@@ -114,28 +114,19 @@ The files comprising mdzWebRequest are as follows:
   
 | Filename | Description |
 | --- | --- |
-| APP_CODE/mdzWebRequest.cs | The mdzWebRequest class written in c# |
-| APP_CODE/mdzSys.cs | A static singleton class with various helper functions used by MyDocz code including mdzWebServices.cs |
-| mdzWebRequestProxy.php | The mdzWebRequest proxy PHP program |
-| mdzWebRequest_Test.aspx | A program to test mdzWebRequest as used on the MyDocz web site |
-| mdzWebRequest_Test.xslt | The mdzWebRequest_Test pages HTML as a XSLT stylesheet |
-| mdzWebRequest_Test.css | CSS stylesheet used by mdzWebRequest_Test pages |
-| mdzWebRequest_Test.js | Javascript file used by mdzWebRequest_Test pages |
-| mdzWebRequest.config | Sample configuration file for mdzWebRequest (see Configuration above) |
-| mdzSys.config | Configuration file for mdzSys functions (see Error Handling above) |
+| Source/APP_CODE/yasl.cs | The singleton class performing all messsage validation |
+| Source/yasl.aspx | The page hit by the client.  It extracts the request information (eg sending address and number of copies), passes this the the yasl class for validation and returns the response to the client |
+| Source/yasl_Admin.aspx | Administration pages that can be used to view current configuration and activity and reload configuration |
+| Source/yasl_Routines.aspc | Routines used by the above pages |
+| Source/yasl_ShowConfig.xslt | The Admin page showing configuration |
+| Source/yasl_ShowSent.xslt | The Admin page showing activity |
+| Source/yasl_Include.xslt | The page template for Admin pages |
+| Source/yasl.css | CSS stylesheet for Admin pages |
+| Source/yasl_Config.xml | Sample configuration file for yasl |
+| Source/yasl_Overrides.xml | Sample configuration time based overrides file for yasl |
+| Client/EventHandlers.vbs | Client plug in to hMailServer |
+| Client/yasl_client_test.vbs | VB Script testing client and server. |
 
-<!-- SECURITY -->
-## Security
-
- Although the mdzWebRequest class has configuration to filter IP addresses and hosts being connected to, the proxy component does not.
- 
- As mdzWebRequest_Proxy.php will forward all web requests it receives, it opens up 'relay' type security issues.  It currently has no facility to deny usage based on client IP or any other criteria.
-
-It should therefore not be installed on a publicly addressable server.
-
-It can though be hosted on the same server as the public site, but under a different web site.  The MyDocz site hosts mdzWebRequest.php on a separate site under the domain name of mdzwr.mydocz.com.  Normally, this site would be configured so that it only allows connection from trusted IP addresses, for example IP addresses within the local network (or loopback) where mdzWebRequest is running and under the control of the application using it.
-
-On the MyDocz site though the www.mydocz.com/mdzWebRequest_Test.aspx test page operates, which itself could be abused as a relay.  So simply restricting access to mdzwr.mydocz.com from local IPs would be pointless.  Instead the mdzwr.mydocz.com domain is also configured to only allow 2 requests per 10 seconds.  This is fine to stop abuse, and no live applications use this domain, but would not be practical in a normal live environment.
 
 
 <!-- LICENSE -->
