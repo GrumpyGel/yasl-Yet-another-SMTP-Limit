@@ -1,0 +1,5 @@
+<yasl Limit_Day="200" Limit_Hour="50" Limit_Warn="75" Limit_Warn_Clear="50" Retain_Ignore="10" Retain_Include="30" Allow_Diff_From="False" Max_Errors="500">
+  <StaticOverride Address="account1@example.com" Limit_Day="30" Limit_Hour="10" Allow_Diff_From="True"/>
+  <StaticOverride Address="account2@example.com" Limit_Day="100"/>
+  <StaticOverride Address="gerald@geraldmoull.com" Limit_Day="20" Limit_Hour="10"/>
+</yasl>

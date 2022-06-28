@@ -1,0 +1,89 @@
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.Header {
+  background-color: #f0f0f0;
+  padding: 10px;
+  margin: 0;
+  border: 0;
+  border-bottom: 2px solid #000000;
+}
+
+.Header h1 {
+  margin-top: 0;
+}
+
+.Actions a {
+  display: inline-block;
+  padding: 10px;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  margin: 2px 2px;
+  background-color: #e0e0e0;
+  color: #000000;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.Errors {
+  margin: 10px 0;
+  border: 2px solid #000000;
+  background-color: #ff0000;
+  color: #ffffff;
+}
+
+.Content {
+  padding: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+  
+th {
+  text-align: left;
+  font-weight: bold;
+  background-color: cyan;
+}
+
+td {
+  background-color: #ffffff;
+}
+
+td, th {
+  padding: 2px 10px;
+  border: 2px solid blue;
+}
+
+.Over {
+  background-color: #ff0000;
+  color: #ffffff;
+}
+
+.Warn {
+  background-color: yellow;
+}
+
+.rowey td, .rowey th  {
+  text-align: right;
+}
+  
+.rowey td:nth-child(1), .rowey th:nth-child(1) {
+  text-align: left;
+}
+
+.domain_accounts {
+  display: none;
+}
+
+.AllDay {
+  display: none;
+}
+
+.ShowAllDay .AllDay {
+  display: table-cell;
+}
