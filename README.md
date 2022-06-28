@@ -21,12 +21,12 @@ An SMTP message limiter for hMailServer
   <h3 align="center">yasl-Yet-another-SMTP-Limit</h3>
 
   <p align="center">
-    Alternative to httpWebRequest allowing modern ciphers on versions of Windows Server prior to 2022
+    This is a module to apply hourly and daily limits to the number of messages
+hMailServer accounts can send.  This was created to stop hacked accounts being
+used to send spam (or at least very much limit it).
     <br />
     <br />
     <br />
-    <a href="http://www.mydocz.com/mdzWebRequest_Test.aspx">View Demo</a>
-    ·
     <a href="https://github.com/GrumpyGel/yasl-Yet-another-SMTP-Limit/issues">Report Bug</a>
     ·
     <a href="https://github.com/GrumpyGel/yasl-Yet-another-SMTP-Limit/issues">Request Feature</a>
@@ -54,19 +54,17 @@ An SMTP message limiter for hMailServer
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-A site I manage integrates to a 3rd Party that updated their SSL connectivity and in doing so restricted the number of allowable ciphers for clients to connect with to 3 (for TLS 1.2).  They are as follows:
+I did someone a favour and said I'd host their email on my hMailServer.
 
-TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256<br />
-TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384<br />
-TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 
+I set the domain and accounts up that they requested, and being a rather naive email administrator, set them up with simple passwords asking them to log in immediately to set up decent secure ones.
 
-The managed site operates in a .Net environment and its httpWebRequest classes use the underlying operating system's https commmunication facilities. The 3 ciphers were not supported on anything other than Windows Server 2022 and we were not in a position to migrate to this platform.
+Of course they didn't. So even though I'd set external IPs up as needing authentication, the result was that their accounts were hacked and all of a sudden my server was spewing out spam. grrr.
 
-I therefore investigated placing another server in our network to operate as a 'proxy' for our calls. The 3rd party uses Linux and PHP, so this was a natural choice.
+I went in and put strong passwords on all the accounts - but there's nothing to stop them putting simple ones back and I don't really know what else might compromise the system. So searched on the hMailServer forum for something to try and stop this happening again - and found the SmtpLimit utility. Perfect.
 
-However, we have PHP installed on our Windows Servers, so investigated if curl within PHP would use these ciphers in a Windows environment.
+Well it would be if it wasn't reliant on reading through lots of file data for each message. When the spammers were hitting my server the server had trouble enough keeping up, adding this file overhead I'm sure would bring the server down - granted it would stop the spam issue, but it would also compromise other services. So I looked at how SmtpLimit interacted with hMailServer and wrote Yet Another Smtp Limit (yasl) which works in memory. It is written in c# and is dependent on and runs under IIS with a VBScript client loaded by hMailServer - I wasn't sure if/how I could persist the data within the VBScript environment.
 
-They did indeed make use of these ciphers, so I have put together a mdzWebRequest package of PHP proxy and .Net class to wrap the .Net httpWebRequest class to optionally make use of the proxy.
+It runs on set Daily/Hourly limits that can be set per account and have time based overrides - eg if someone is going to do a mail shot. It does save hourly logs, so a process could be created to analyse these like SmtpLimit does and make appropriate Config settings. However, I only host a few accounts - so stopping spam is my priority, I don't mind a bit of admin every now and then to set the config. I've also added a configurable feature to disable the sending of email if the From address is not the same as the authorised login account. There's a couple of admin pages to show the config setup (for example, to ensure it is loaded correctly) and to view which accounts have sent email and how many emails they have sent - highlighted if they are near their limit (a warning email is sent like in SmtpLimit) or over it.
 
 <!-- GETTING STARTED -->
 
@@ -81,103 +79,34 @@ Clone the repo
 <!-- DOCUMENTATION -->
 ## Documentation
 
-To make a web request using mdzWebRequest perform the following:
+The 'yasl' class performs limiting logic/processing.  It is a 'singleton' class/object written in c#.  Being a singleton, rather than static, object creation and destruction is controlled to enable current data to be saved (on destruction) and reloaded (on creation) so that its state is maintained.  The configuration is also loaded on the class creation.
 
-<ol>
-<li>Create an instance of mdzWebRequest, for example MyRequest = new mdzWebRequest();</li>
-<li>Set the Request Properties</li>
-<li>Envoke the Submit() Method</li>
-<li>Check the Response Properties</li>
-</ol>
+Daily limits do not relate to a calendar day, they cover activity in the previous 24 hours.  Hourly limits relate to each hour, not the previous 60 minutes.
 
-### Request Properties
+The yasl class is front-ended by a yasl.aspx URL.  The vbscript code loaded by hMailServer extracts the required information from the Client and Message parameters to the onAcceptMessage called by hMailServer and posts these to the yasl.aspx URL.  The response determines if the client will instruct hMailServer to send the message or not.
 
-| Property | DataType | Description |
-| --- | --- | --- |
-| URL | string | The URL for the service you wish to request |
-| Method | string | The request method, must be "GET", "POST" or "PUT". |
-| Content | string | Any data to post |
-| ContentType | string | Mime type for data to be posted, fopr example "application/x-www-form-urlencoded", "text/xml; encoding='utf-8'" |
-| UserName | string | If authentification is required, the UserName |
-| Password | string | If authentification is required, the Password |
-| ExpectedFormat | string | The response can be returned as a string or binary (btye[]), see below for options |
-| MaxBinarySize | int | If the response is Binary, this is the maximum allowable size |
-| UseProxy | bool | If false, the request will be made using a httpWebRequest object, if True the request will be made via the mdzWebRequest_Proxy.php |
-| ProxyURL | string | URL to access to proxy. |
-| ProxyUserName | string | If authentification is required to access the proxy, the UserName |
-| ProxyPassword | string | If authentification is required to access the proxy, the Password |
+There is also a yasl_Admin.aspx URL that is viewed through a browser to show the current state on the yasl singleton - ie config and accounts that have sent mail.  It can also be used to reload changed config files rather than destroying the object.
 
-#### Expectedformat
+yasl can also be used to ensure that all email sent by and account is has a matching from address.
 
-The ExpectedFormat property may be set to one of the following:
+### Server
 
-| Value | Description |
-| --- | --- |
-| Text | The response is expected to be Text and will be returned in the Response property as a string, only use when safe to do so |
-| Binary | The response is expected to be Binary and will be returned in the ResponseBinary property as a byte[] |
-| Detect (Default) | When ResponseType is "text/*", "application/xhtml+xml", "application/xml" or "application/json" it will be processed as Text, otherwise it will be processed as Binary |
+The Server folder contains content that should be extracted to an IIS website folder which will host it.
 
-### Response Properties
+The yasl code has no security to ensure outsiders are not interfering with it. The IIS site that hosts should be configured to only allow trusted IP addresses - ie the mail server and administrative/testing clients and servers.
 
-| Property | DataType | Description |
-| --- | --- | --- |
-| ErrNo | int | An error code that may be from mdzWebRequest or culr if using the proxy, see below |
-| ErrMsg | string | An error code that may be from mdzWebRequest or culr if using the proxy, see below |
-| ResponseCode | HttpStatusCode | The response status code returned by the server - see [https://docs.microsoft.com/en-us/dotnet/api/system.net.httpstatuscode?view](https://docs.microsoft.com/en-us/dotnet/api/system.net.httpstatuscode) |
-| ResponseType | string | The response Mine Content Type.  Any parameters following the Content type in the header supplied by the server are stripped, for example "text/html; charset=utf-8" will return just "text/html" |
-| ResponseTypeParams | string | Any parameters following the Content Type, for example "text/html; charset=utf-8" will return "charset=utf-8" |
-| IsBinary | bool | If True, the response has been treated as Binary and is therefore provided in the ResponseBinary property.  If False the response is treated as Text and is provided in the Response property |
-| Response | string | The response data returned by the server, if the IsBinary property is False |
-| ResponseBinary | byte[] | The response data returned by the server, if the IsBinary property is True |
+The yasl class is found in the yasl.cs file in the APP_CODE folder.  There is limited documentation at class and helper class level within this file.
 
-### Error Handling
+### Client
 
-If the ErrNo property has a value of 0 after Submit() has been envoked, the requested was processed successfully.
+The Client folder content should be placed into the Events folder of the hMailServer installation.  As well as the EventHandlers.vbs file used by hMailServer, there is also a yasl_client_test.vbs script that can be used to test connection to the server and the server itself.  Command line usage for this is found in the file.
 
-This does not necessarily mean that the resource requested performed correctly, the ResponseCode property should also be checked for OK/200 and any other logic associated with the request performed on the Response(/Binary) data.
-
-For direct (non-proxy) requests, other than the first 2 errors listed below, ErrNo will always return 0.  If an exception is thrown by the httpWebRequest wrapper, these are thrown back to the calling program.
-
-For proxy requests, exceptions should be less likely as they are trapped and return the 14011 and 14013 codes listed below.  Although this may not give such high detail on the actual error, it highlights what part of the process failed and the exact message is still returned.  If an error was returned by the curl request to the server, this is returned in ErrNo.
-
-| ErrNo | Description |
-| --- | --- |
-| 14001 | The URL property is blank |
-| 14002 | The Method property is not "GET", "POST" or "PUT" |
-| 14003 | The UseProxy property is True, but ProxyURL property is blank |
-| 14004 | The request was not allowed, client IP or Host blocked , see Configuration below.  This error will also be raised if you have Host exceptionsand the supplied URL property is invalid meaning the Host could not be extracted from it. |
-| 14011 | A proxy request was made, but an error was thrown communicating with the proxy, ErrMsg will include a description |
-| 14012 | The ResponseCode received from the proxy request was not 200 indicating failure, ErrMsg will include the ResponseCode  |
-| 14013 | An error occurred extracting the request response from the proxy response, ErrMsg will include a description |
-
-A list of curl ErrNo codes can be found at https://curl.se/libcurl/c/libcurl-errors.html
-
-When exceptions are raised within the mdzWebRequest class, even if they are not passed on as exception but return 14011 and 14013 error codes, the mdzSys.ErrorLog() function is called.  This can be configured to email details of the error raised and log them to a file.  These are configured within the <smpt> and <errorlog> sections of the mdzSys.config file and documented in the mdzSys.cs source.
-  
 ### Configuration
 
-mdzWebRequest allows for validation of allowable client IP addresses (ie browser or service client IP) and Host server names in the URL property.  The following settings are available:
+The yasl class is configured using the yasl_Config.xml and yasl_Overrides.xml files.  These are documented in the yasl class in the APP_CODE\yasl.cs file.
 
-| Setting | Description |
-| --- | --- |
-| IP_AutoAllow | A 'True' value means all client IP addresses are by default allowed, a 'False' value means no IP addresses are by default allowed |
-| Host_AutoAllow | A 'True' value means all hosts are by default allowed, a 'False' value means no hosts are by default allowed |
-| ValidationLog | If a log is required of validation failures, the log filename should be set here.  If the name is prefixed by a '~' character it will be created in the site directory.  If empty, no log is produced. |
-| Exception | Exceptions to the IP_AutoAllow and Host_AutoAllow settings can each be made as a separate Exception.  The Exception should have a "Type" attribute of "IP" or "Host" and a "Value" attribute of the IP address/Host name that is the exception.  IP address values can be IPV4 or IPV6 and can optionally include CIDR notation for subnet mask.  IPV6 code has not been tested. |
-  
-Configuration settings are made in the mdzWebRequest.config file which is in XML format.  The following example only allows client connection from 127.0.0.1 and 192.168.1.* IP addresses, only allows requests to be made to www.mydocz.com and will log validation failures in a file called 'mdzWebRequest.log':
-  
-```
-<mdzWebRequest IP_AutoAllow="False"
-               Host_AutoAllow="False"
-               ValidationLog="~mdzWebRequest.log">
-    <Exception Type="IP"   Value="127.0.0.1"/>
-    <Exception Type="IP"   Value="192.168.1.1/24"/>
-    <Exception Type="Host" Value="www.mydocz.com"/>
-</mdzWebRequest>
-```  
+The client should be configured in the EventHandlers.vbs file.  It is documented in the file what can be set - eg admin email address for warning/error messages.
 
-Configuration is loaded by a singleton mdzWebRequestConfig class (defined in mdzWebRequest.cs).  This is loaded the first time mdzWebRequest is referenced and therefore improves performance as it does not need to be parsed for each use of mdzWebRequest.  However, once loaded it does not reload the configuration file.  Therefore if the configuration file is edited, the web site should be restarted to reload the mdzWebRequestConfig class.
 
 ### Source Files
 
