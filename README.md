@@ -15,7 +15,7 @@ An SMTP message limiter for hMailServer
 <br />
 <p align="center">
   <a href="https://github.com/GrumpyGel/yasl-Yet-another-SMTP-Limit">
-    <img src="yasl_ShowSent.png" alt="Sent Summary" width="180">
+    <img src="yasl_ShowSent.png" alt="Sent Summary">
   </a>
 
   <h3 align="center">yasl-Yet-another-SMTP-Limit</h3>
