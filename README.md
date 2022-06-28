@@ -42,7 +42,6 @@ used to send spam (or at least very much limit it).
     <li><a href="#about-the-project">About The Project</a></li>
     <li><a href="#installation--usage">Installation &amp; Usage</a></li>
     <li><a href="#documentation">Documentation</a></li>
-    <li><a href="#documentation">Security</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
