@@ -22,8 +22,11 @@ An SMTP message limiter for hMailServer
 
   <p align="center">
     This is a module to apply hourly and daily limits to the number of messages hMailServer accounts can send.
+  </p>
   
-  This was created to stop hacked accounts being used to send spam.
+  <p align="center">
+    This was created to stop hacked accounts being used to send spam.
+  </p>
     <br />
     <br />
     <br />
