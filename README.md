@@ -149,7 +149,7 @@ Project Link: [https://github.com/GrumpyGel/yasl-Yet-another-SMTP-Limit](https:/
 ## Acknowledgements
 
 * [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
-* [IP and subnet validation code adapted from Christoph Sonntag's Stack Overflow thread response](https://stackoverflow.com/a/56461160)
+* [Palinka's "Limit Outgoing Messages" project on hMailServer forum](https://hmailserver.com/forum/viewtopic.php?t=34882)
 
 
 
