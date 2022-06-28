@@ -21,9 +21,9 @@ An SMTP message limiter for hMailServer
   <h3 align="center">yasl-Yet-another-SMTP-Limit</h3>
 
   <p align="center">
-    This is a module to apply hourly and daily limits to the number of messages
-hMailServer accounts can send.  This was created to stop hacked accounts being
-used to send spam (or at least very much limit it).
+    This is a module to apply hourly and daily limits to the number of messages hMailServer accounts can send.
+  
+  This was created to stop hacked accounts being used to send spam.
     <br />
     <br />
     <br />
